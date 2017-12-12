@@ -29,7 +29,7 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                           #
     # Hint: you can use the function np.pad for padding.                        #
     #############################################################################
-
+    pass
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -80,11 +80,22 @@ def max_pool_forward_naive(x, pool_param):
     #############################################################################
     # TODO: Implement the max pooling forward pass                              #
     #############################################################################
-
+    N,C,H,W = x.shape
+    H_pool = pool_param['pool_height']
+    W_pool = pool_param['pool_width']
+    Stride = pool_param['stride']
+    H_new = int((H-H_pool)/Stride + 1)
+    W_new = int((W-W_pool)/Stride + 1)
+    out = np.zeros((N,C,H_new,W_new))
+    for i in range(N):
+      for j in range(C):
+        for k in range(H_new):
+          for l in range(W_new):
+            out[i,j,k,l] = np.max(x[i, j, k*Stride:k*Stride+H_pool,l*Stride:l*Stride+W_pool])
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
-    cache = (x, maxIdx, pool_param)
+    cache = (x, pool_param)
     return out, cache
 
 
@@ -103,7 +114,22 @@ def max_pool_backward_naive(dout, cache):
     #############################################################################
     # TODO: Implement the max pooling backward pass                             #
     #############################################################################
-
+    x,pool_param = cache
+    N,C,H,W = x.shape
+    H_pool = pool_param['pool_height']
+    W_pool = pool_param['pool_width']
+    Stride = pool_param['stride']
+    H_new = int((H-H_pool)/Stride + 1)
+    W_new = int((W-W_pool)/Stride + 1)
+    dx = np.zeros((N,C,H,W))
+    for i in range(N):
+      for j in range(C):
+        for k in range(H_new):
+          for l in range(W_new):
+            x_pool = x[i, j, k*Stride:k*Stride+H_pool,l*Stride:l*Stride+W_pool]
+            maxp = np.max(x_pool)
+            x_mask = x_pool == maxp
+            dx[i, j, k*Stride:k*Stride+H_pool,l*Stride:l*Stride+W_pool] += dout[i,j,k,l]*x_mask 
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
